@@ -1,4 +1,4 @@
-let pollIndex = 0, polls = new Map();
+let pollIndex = 0;
 
 // The corresponding emojis are used as unique keys for choices within each poll object
 const emoji = {
@@ -135,6 +135,86 @@ class Poll {
 		// TODO generate charts of results
 		return null;
 	}
+}
+
+function generateDiscordEmbed(poll, type) {
+	var embed = {}, choiceList = ``, resultsList = ``;
+	poll.choices.forEach((choice, key) => {
+		choiceList += `${choice.emoji} - ${choice.name} \n`;
+		resultsList += `***${choice.votes} votes*** \n`;
+	});
+
+	switch(type) {
+		case 'poll':
+			embed = {
+				title: `Poll ${poll.id}: ${poll.name}`,
+				description: `To vote, reply with\`!vote choice\` within the next ${poll.timeout} minutes. For example, "!vote ${poll.choices.keys().next().value}". If multiple polls are open, you\'ll have to specify which one using its number and a pound sign: \`!vote #${poll.id} choice\`.`,
+				color: poll.color,
+				timestamp: poll.timeCreated,
+				footer: {
+					text: poll.footNote
+				},
+				author: {
+					name: defaults.appName
+				},
+				fields: [{
+					name: `Choices:`,
+					value: choiceList
+				}]
+			};
+			break;
+		case 'results':
+			//TODO: Order choices in results based on number of votes
+
+			embed = {
+				title: `*Results* - Poll ${poll.id}: ${poll.name}`,
+				description: poll.open ? `This poll is still open, so these results may change.` : `This poll has closed and cannot be voted on.`,
+				color: poll.color,
+				timestamp: new Date(),
+				footer: {
+					text: `For more detailed results, use the \`--users\` flag.`
+				},
+				author: {
+					name: defaults.appName
+				},
+				fields: [{
+					name: `Choices:`,
+					value: choiceList,
+					inline: true
+				}, {
+					name: `Results:`,
+					value: resultsList,
+					inline: true
+				}]
+			};
+			break;
+		case 'detailResults':
+			//TODO: Order choices in results based on number of votes
+
+			embed = {
+				title: `*Results* - Poll ${poll.id}: ${poll.name}`,
+				description: poll.open ? `This poll is still open, so these results may change.` : `This poll has closed and cannot be voted on.`,
+				color: poll.color,
+				timestamp: new Date(),
+				footer: {
+					text: `We don't have detailed results capability yet.`
+				},
+				author: {
+					name: defaults.appName
+				},
+				fields: [{
+					name: `Choices:`,
+					value: choiceList,
+					inline: true
+				}, {
+					name: `Results:`,
+					value: resultsList,
+					inline: true
+				}]
+			};
+	}
+
+	return embed;
 }
 
 module.exports = Poll;
